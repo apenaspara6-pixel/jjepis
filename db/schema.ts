@@ -50,3 +50,14 @@ export const rateLimits = sqliteTable("rate_limits", {
   count: integer("count").notNull(),
   expires: integer("expires").notNull(),
 });
+
+export const adminSessions = sqliteTable(
+  "admin_sessions",
+  {
+    id: text("id").primaryKey(),
+    username: text("username").notNull(),
+    credentialVersion: text("credential_version").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+  },
+  (t) => [index("idx_admin_sessions_expiry").on(t.expiresAt)],
+);

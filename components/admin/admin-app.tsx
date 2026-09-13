@@ -246,14 +246,12 @@ export function AdminApp({
             Ver loja <ArrowUpRight size={17} />
           </a>
           <p className="admin-user">{email}</p>
-          <a
-            href="/signout-with-chatgpt?return_to=%2Fadmin"
-            target="_top"
-            className="admin-signout"
-          >
-            <LogOut size={16} />
-            Sair
-          </a>
+          <form action="/api/auth/logout" method="post">
+            <button type="submit" className="admin-signout">
+              <LogOut size={16} />
+              Sair
+            </button>
+          </form>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="admin-main">

@@ -1202,3 +1202,23 @@
     margin-left: -9px;
   }
 }
+
+.admin-login form label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.admin-login form input {
+  margin-bottom: 20px;
+}
+.admin-login .admin-login-error {
+  color: #a22b1d;
+  font-size: 14px;
+  background: #fff0ec;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 0 0 20px;
+}
+.admin-login form .btn {
+  margin-top: 8px;
+}

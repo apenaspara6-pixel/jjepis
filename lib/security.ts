@@ -1,5 +1,4 @@
-import { env } from "cloudflare:workers";
-import { getChatGPTUser } from "@/app/chatgpt-auth";
+import { getAdminSession } from "./admin-auth";
 import { database } from "./repository";
 export class HttpError extends Error {
   constructor(
@@ -10,15 +9,13 @@ export class HttpError extends Error {
   }
 }
 export async function adminUser() {
-  const u = await getChatGPTUser();
-  if (!u) throw new HttpError("Entre com sua conta para continuar.", 401);
-  const allowed = String((env as any).ADMIN_EMAILS || "")
-    .split(",")
-    .map((s: string) => s.trim().toLowerCase())
-    .filter(Boolean);
-  if (!allowed.includes(u.email.toLowerCase()))
-    throw new HttpError("Esta conta não tem permissão administrativa.", 403);
-  return u;
+  const user = await getAdminSession();
+  if (!user)
+    throw new HttpError(
+      "Entre com seu acesso administrativo para continuar.",
+      401,
+    );
+  return user;
 }
 export function sameOrigin(req: Request) {
   const o = req.headers.get("origin");

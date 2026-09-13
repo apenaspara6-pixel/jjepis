@@ -22,9 +22,9 @@ O projeto usa Cloudflare D1 e R2, com os vínculos lógicos DB e BUCKET. Migraç
 
 ## Administração e segurança
 
-A entrada administrativa é `/admin`. A identidade é fornecida pelo login ChatGPT do Sites. A variável secreta `ADMIN_EMAILS` contém a lista de administradores; a publicação foi configurada para a conta indicada pela empresa. Sem lista ou sem login, nenhuma operação administrativa é permitida.
+A entrada administrativa é `/admin`, com usuário e senha. Configure `ADMIN_USERNAME` e o segredo `ADMIN_PASSWORD_HASH` no ambiente do Sites. O hash usa PBKDF2-SHA256, 600.000 iterações e salt aleatório de 16 bytes. Nunca salve a senha em texto no código. A sessão opaca fica em cookie HttpOnly, SameSite=Strict e Secure em HTTPS; o banco guarda somente seu hash. Ela expira em oito horas, é revogada ao sair e invalidada quando a credencial muda. O login limita tentativas por IP. A privacidade da hospedagem Sites é independente deste login e permanece conforme o público autorizado.
 
-O perfil portable do starter permite uma identidade fictícia exclusivamente em desenvolvimento local. Ela não faz parte do código de produção e só deve ser adicionada ao ambiente local durante testes autorizados.
+A identidade ChatGPT do starter continua disponível para a área de cliente, mas não concede acesso administrativo. Configure credenciais locais separadas em .env para testar.
 
 Não salve credenciais no código ou no repositório. Configure segredos pelo ambiente seguro do Sites. Os endpoints administrativos verificam identidade e autorização no servidor; gravações verificam origem e conteúdo. Uploads aceitam apenas imagens JPEG, PNG ou WebP, com validação da assinatura e limite de 5 MB.
 
