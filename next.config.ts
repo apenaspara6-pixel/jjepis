@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  typescript: { tsconfigPath: "tsconfig.vercel.json" },
   turbopack: { resolveAlias: { "@/lib/platform": "./lib/vercel-runtime.ts" } },
   webpack(config, { webpack }) {
     config.resolve.alias["@/lib/platform"] = path.resolve("lib/vercel-runtime.ts");
