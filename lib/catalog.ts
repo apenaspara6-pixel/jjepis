@@ -62,7 +62,7 @@ export const defaults: Settings = {
   instagram: "",
   facebook: "",
   hero: "/images/tanker-hero.webp",
-  secondaryBanner: "",
+  secondaryBanner: "/images/tanker-inspection.webp",
   ga: "",
   gtm: "",
   pixel: "",

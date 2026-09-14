@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Shell } from "./chrome";
 import { ProductGrid, CategoryCard, SectionHeading } from "./primitives";
-import { type Product, type Settings, type Category } from "@/lib/catalog";
+import { defaults, type Product, type Settings, type Category } from "@/lib/catalog";
 import { useStore } from "./context";
 export function Home({
   products,
@@ -151,8 +151,8 @@ export function Home({
       </section>
       <section className="institutional">
         <img
-          src={s.secondaryBanner || s.hero}
-          alt="Caminhão-tanque em operação industrial"
+          src={s.secondaryBanner || defaults.secondaryBanner}
+          alt="Inspeção de segurança ao lado de um caminhão-tanque"
           loading="lazy"
         />
         <div className="institutional-shade" />
