@@ -182,7 +182,7 @@ export const money = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
     n,
   );
-export const origin = "https://jj-epis-seguranca.jepfrancisco123.chatgpt.site";
+export const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://jj-epis-seguranca.jepfrancisco123.chatgpt.site";
 export const normalize = (s: string) =>
   s
     .normalize("NFD")

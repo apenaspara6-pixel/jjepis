@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+import { env } from "@/lib/platform";
 import { type Product, normalize, slugify } from "./catalog";
 const conf = () => env as any;
 export const shopifyReady = () =>

@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+import { env } from "@/lib/platform";
 export async function GET(
   _r: Request,
   { params }: { params: Promise<{ id: string }> },

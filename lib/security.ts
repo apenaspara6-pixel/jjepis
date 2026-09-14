@@ -1,5 +1,6 @@
 import { getAdminSession } from "./admin-auth";
 import { database } from "./repository";
+import { requestIp } from "./request-ip";
 export class HttpError extends Error {
   constructor(
     message: string,
@@ -45,7 +46,7 @@ export function fail(e: unknown) {
   );
 }
 export async function rateLimit(req: Request, scope: string, limit: number) {
-  const ip = req.headers.get("cf-connecting-ip") || "local";
+  const ip = requestIp(req);
   const hash = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(ip),

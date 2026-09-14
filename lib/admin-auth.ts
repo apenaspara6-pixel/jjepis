@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+import { env } from "@/lib/platform";
 import { cookies } from "next/headers";
 import {
   createHash,
@@ -8,6 +8,7 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 import { database } from "./repository";
+import { requestIp } from "./request-ip";
 
 const SESSION_SECONDS = 8 * 60 * 60;
 export const ADMIN_COOKIE = "jj_admin_session";
@@ -84,7 +85,7 @@ export async function loginAttempt(req: Request) {
     "admin-login:" +
     (config()?.version || "unconfigured") +
     ":" +
-    hash(req.headers.get("cf-connecting-ip") || "local");
+    hash(requestIp(req));
   const now = Date.now();
   const row = await database()
     .prepare(

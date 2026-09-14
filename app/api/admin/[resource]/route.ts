@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+import { env } from "@/lib/platform";
 import {
   database,
   getSettings,
@@ -15,6 +15,7 @@ import {
 } from "@/lib/security";
 import {
   productSchema,
+  productValidationIssues,
   settingsSchema,
   categorySchema,
 } from "@/lib/validation";
@@ -126,7 +127,7 @@ export async function POST(
       const parsed = productSchema.safeParse(b);
       if (!parsed.success)
         throw new HttpError(
-          parsed.error.issues[0]?.message || "Produto inválido.",
+          productValidationIssues(parsed.error)[0]?.message || "Confira os dados do produto.",
         );
       const p = parsed.data;
       p.id = p.id || crypto.randomUUID();

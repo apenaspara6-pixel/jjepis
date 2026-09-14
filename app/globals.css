@@ -769,6 +769,21 @@ th {
   margin: -15px 0 24px;
   font-size: 12px;
 }
+.form-error-summary {
+  margin-bottom: 24px;
+  padding: 18px 20px;
+  border: 1px solid #e8b4ae;
+  border-radius: 8px;
+  background: #fff4f2;
+  color: #8c241a;
+}
+.form-error-summary p {
+  margin: 8px 0 0;
+}
+.form-field-error {
+  color: #a5281c;
+}
+
 .institutional {
   position: relative;
   min-height: 460px;

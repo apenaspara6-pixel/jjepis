@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers";
+import { env } from "@/lib/platform";
 import { adminUser, sameOrigin, fail, HttpError } from "@/lib/security";
 import { database } from "@/lib/repository";
 export async function POST(req: Request) {

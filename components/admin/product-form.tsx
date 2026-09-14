@@ -15,6 +15,7 @@ import { Choice } from "@/components/store/primitives";
 import { type Product, type Category, slugify } from "@/lib/catalog";
 import { api } from "@/components/store/context";
 import { toast } from "sonner";
+import { productSchema, productValidationIssues } from "@/lib/validation";
 export function ImageUpload({
   images,
   onChange,
@@ -59,6 +60,7 @@ export function ImageUpload({
           ),
         );
         const form = new FormData();
+        if (blob.size > 4 * 1024 * 1024) throw Error("A imagem otimizada precisa ter até 4 MB. Use uma foto com resolução menor.");
         form.set("file", blob, file.name.replace(/\.[^.]+$/, "") + ".webp");
         const r = await fetch("/api/upload", { method: "POST", body: form });
         const j: any = await r.json();
@@ -242,11 +244,14 @@ export function AdminProductForm({
         .map(([k, v]) => k + ": " + v)
         .join("\n"),
     ),
-    [tags, setTags] = useState(initial?.tags.join(", ") || "");
+    [tags, setTags] = useState(initial?.tags.join(", ") || ""),
+    [errors, setErrors] = useState<Record<string, string>>({}),
+    [saveError, setSaveError] = useState("");
   const set = (k: string, v: any) => setP((p) => ({ ...p, [k]: v }));
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
+    setErrors({});
+    setSaveError("");
     try {
       const specifications = Object.fromEntries(
         spec
@@ -257,7 +262,7 @@ export function AdminProductForm({
             return [x.slice(0, i).trim(), x.slice(i + 1).trim()];
           }),
       );
-      await api("/api/admin/products", {
+      const parsed = productSchema.safeParse({
         ...p,
         specifications,
         tags: tags
@@ -265,9 +270,21 @@ export function AdminProductForm({
           .map((s) => s.trim())
           .filter(Boolean),
       });
+      if (!parsed.success) {
+        const issues = productValidationIssues(parsed.error);
+        setErrors(Object.fromEntries(issues.map((issue) => [issue.path, issue.message])));
+        toast.error(issues[0].message);
+        const input = (e.currentTarget as HTMLFormElement).elements.namedItem(issues[0].path);
+        if (input instanceof HTMLElement) input.focus();
+        return;
+      }
+      setP(parsed.data);
+      setBusy(true);
+      await api("/api/admin/products", parsed.data);
       toast.success("Produto salvo com sucesso.");
       onSaved();
     } catch (e) {
+      setSaveError((e as Error).message);
       toast.error((e as Error).message);
     } finally {
       setBusy(false);
@@ -277,6 +294,9 @@ export function AdminProductForm({
     <label>
       {label}
       <input
+        name={key}
+        aria-invalid={!!errors[key]}
+        aria-describedby={errors[key] ? `${key}-error` : key === "slug" ? "slug-hint" : undefined}
         type={type}
         value={String(p[key] ?? "")}
         onChange={(e) =>
@@ -284,7 +304,10 @@ export function AdminProductForm({
         }
         min={type === "number" ? 0 : undefined}
         step={["price", "comparePrice"].includes(key) ? ".01" : undefined}
+        onBlur={key === "slug" ? () => set("slug", slugify(p.slug || p.name)) : undefined}
       />
+      {key === "slug" && <small id="slug-hint">Gerado a partir do nome. Espaços e acentos são ajustados automaticamente.</small>}
+      {errors[key] && <small id={`${key}-error`} className="form-field-error">{errors[key]}</small>}
     </label>
   );
   return (
@@ -303,6 +326,13 @@ export function AdminProductForm({
           </Button>
         </div>
       </div>
+      {(saveError || Object.keys(errors).length > 0) && (
+        <div className="form-error-summary" role="alert">
+          <b>Confira os dados para salvar o produto.</b>
+          {saveError && <p>{saveError}</p>}
+          {Object.entries(errors).map(([key, message]) => <p key={key}>{message}</p>)}
+        </div>
+      )}
       <div className="admin-form-layout">
         <div>
           <section className="admin-panel">
@@ -311,6 +341,9 @@ export function AdminProductForm({
               <label className="span-2">
                 Nome do produto
                 <input
+                  name="name"
+                  aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? "name-error" : undefined}
                   required
                   minLength={3}
                   maxLength={180}
@@ -320,6 +353,7 @@ export function AdminProductForm({
                     if (!initial) set("slug", slugify(e.target.value));
                   }}
                 />
+                {errors.name && <small id="name-error" className="form-field-error">{errors.name}</small>}
               </label>
               {field("slug", "Endereço / slug")}
               {field("sku", "Código / SKU")}
