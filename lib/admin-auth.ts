@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 import { cookies } from "next/headers";
 import {
   createHash,
+  createHmac,
   pbkdf2Sync,
   randomBytes,
   timingSafeEqual,
@@ -16,18 +17,24 @@ function config() {
   const value = env as {
     ADMIN_USERNAME?: string;
     ADMIN_PASSWORD_HASH?: string;
+    ADMIN_PASSWORD_PEPPER?: string;
   };
   const username = value.ADMIN_USERNAME || "";
   const passwordHash = value.ADMIN_PASSWORD_HASH || "";
+  const pepper = value.ADMIN_PASSWORD_PEPPER || "";
   if (
     !username ||
-    !/^pbkdf2-sha256:600000:[a-f0-9]{32}:[a-f0-9]{64}$/.test(passwordHash)
+    !/^[a-f0-9]{64}$/.test(pepper) ||
+    !/^pbkdf2-sha256-peppered:100000:[a-f0-9]{32}:[a-f0-9]{64}$/.test(
+      passwordHash,
+    )
   )
     return null;
   return {
     username,
     passwordHash,
-    version: hash(username + "\0" + passwordHash),
+    pepper,
+    version: hash(username + "\0" + passwordHash + "\0" + pepper),
   };
 }
 export async function getAdminSession() {
@@ -55,11 +62,17 @@ export function verifyAdminPassword(username: string, password: string) {
   const actual = pbkdf2Sync(
     password,
     Buffer.from(salt, "hex"),
-    600000,
+    100000,
     32,
     "sha256",
   );
-  const passwordMatches = timingSafeEqual(actual, Buffer.from(expected, "hex"));
+  const protectedHash = createHmac("sha256", Buffer.from(c.pepper, "hex"))
+    .update(actual)
+    .digest();
+  const passwordMatches = timingSafeEqual(
+    protectedHash,
+    Buffer.from(expected, "hex"),
+  );
   const userMatches = timingSafeEqual(
     Buffer.from(hash(username), "hex"),
     Buffer.from(hash(c.username), "hex"),
@@ -68,7 +81,10 @@ export function verifyAdminPassword(username: string, password: string) {
 }
 export async function loginAttempt(req: Request) {
   const key =
-    "admin-login:" + hash(req.headers.get("cf-connecting-ip") || "local");
+    "admin-login:" +
+    (config()?.version || "unconfigured") +
+    ":" +
+    hash(req.headers.get("cf-connecting-ip") || "local");
   const now = Date.now();
   const row = await database()
     .prepare(

@@ -22,7 +22,7 @@ O projeto usa Cloudflare D1 e R2, com os vínculos lógicos DB e BUCKET. Migraç
 
 ## Administração e segurança
 
-A entrada administrativa é `/admin`, com usuário e senha. Configure `ADMIN_USERNAME` e o segredo `ADMIN_PASSWORD_HASH` no ambiente do Sites. O hash usa PBKDF2-SHA256, 600.000 iterações e salt aleatório de 16 bytes. Nunca salve a senha em texto no código. A sessão opaca fica em cookie HttpOnly, SameSite=Strict e Secure em HTTPS; o banco guarda somente seu hash. Ela expira em oito horas, é revogada ao sair e invalidada quando a credencial muda. O login limita tentativas por IP. A privacidade da hospedagem Sites é independente deste login e permanece conforme o público autorizado.
+A entrada administrativa é `/admin`, com usuário e senha. Configure `ADMIN_USERNAME` e os segredos `ADMIN_PASSWORD_HASH` e `ADMIN_PASSWORD_PEPPER` no ambiente do Sites. O hash usa PBKDF2-SHA256 com 100.000 iterações (limite do runtime hospedado), salt aleatório de 16 bytes e HMAC-SHA256 posterior com pepper aleatório de 32 bytes mantido como segredo. O formato é `pbkdf2-sha256-peppered:100000:saltHex:hmacHex`. Não remova o pepper nem armazene segredos no código. Nunca salve a senha em texto no código. A sessão opaca fica em cookie HttpOnly, SameSite=Strict e Secure em HTTPS; o banco guarda somente seu hash. Ela expira em oito horas, é revogada ao sair e invalidada quando a credencial muda. O login limita tentativas por IP. A privacidade da hospedagem Sites é independente deste login e permanece conforme o público autorizado.
 
 A identidade ChatGPT do starter continua disponível para a área de cliente, mas não concede acesso administrativo. Configure credenciais locais separadas em .env para testar.
 
