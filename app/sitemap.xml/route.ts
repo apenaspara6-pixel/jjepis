@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { listProducts, listCategories } from "@/lib/repository";
 import { origin } from "@/lib/catalog";
 export async function GET() {
@@ -17,3 +19,4 @@ export async function GET() {
     { headers: { "Content-Type": "application/xml" } },
   );
 }
+
